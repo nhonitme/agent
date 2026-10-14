@@ -175,13 +175,13 @@ if AGENT_HOST not in _LOOPBACK_HOSTS:
 if not 1 <= AGENT_PORT <= 65535:
     raise RuntimeError("AGENT_PORT phải nằm trong khoảng 1..65535.")
 if (
-    not 1 <= MAX_CONCURRENT <= 10
+    not 1 <= MAX_CONCURRENT <= 30
     or not 1 <= MAX_HTTP_CONCURRENT <= 100
     or not 1 <= MAX_DETAIL_ITEMS <= 20000
     or not 1 <= MAX_REQUEST_BODY_MB <= 50
     or not 1 <= GDT_PAGE_SIZE <= 50
     or HTTP_QUEUE_TIMEOUT <= 0
-    or not 1 <= DETAIL_WORKERS <= 10
+    or not 1 <= DETAIL_WORKERS <= 30
     or not 1 <= DETAIL_MAX_ATTEMPTS <= 5
     or DETAIL_REQUEST_TIMEOUT <= 0
     or DETAIL_429_COOLDOWN <= 0
