@@ -160,7 +160,7 @@ GDT_CA_BUNDLE       = os.getenv("GDT_CA_BUNDLE", "").strip()
 # Detail workers are capped separately from the global GDT connection pool.
 DETAIL_WORKERS            = int(os.getenv("DETAIL_WORKERS", "3"))
 DETAIL_MAX_ATTEMPTS       = int(os.getenv("DETAIL_MAX_ATTEMPTS", "2"))
-DETAIL_REQUEST_TIMEOUT    = float(os.getenv("DETAIL_REQUEST_TIMEOUT", "25"))
+DETAIL_REQUEST_TIMEOUT    = float(os.getenv("DETAIL_REQUEST_TIMEOUT", "8"))
 DETAIL_429_COOLDOWN       = float(os.getenv("DETAIL_429_COOLDOWN", "10"))
 DETAIL_429_ABORT_AFTER    = int(os.getenv("DETAIL_429_ABORT_AFTER", "4"))
 DETAIL_TRANSPORT_ABORT_AFTER = int(os.getenv("DETAIL_TRANSPORT_ABORT_AFTER", "3"))
