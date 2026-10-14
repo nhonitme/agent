@@ -105,7 +105,7 @@ if os.path.exists(_env_file):
 # ── Phiên bản ứng dụng ──────────────────────────────────────────────────────
 # Fallback khi chạy .py (không có resource version trong file). Khi build .exe,
 # version thật được đọc trực tiếp từ metadata của AMConnectGDT.exe (version_info.txt).
-APP_VERSION_FALLBACK = "1.0.7"
+APP_VERSION_FALLBACK = "1.0.8"
 
 
 def _get_app_version() -> str:
