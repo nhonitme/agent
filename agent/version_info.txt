@@ -1,8 +1,8 @@
 # UTF-8
 VSVersionInfo(
   ffi=FixedFileInfo(
-    filevers=(1, 0, 7, 0),
-    prodvers=(1, 0, 7, 0),
+    filevers=(1, 0, 8, 0),
+    prodvers=(1, 0, 8, 0),
     mask=0x3f,
     flags=0x0,
     OS=0x40004,
@@ -16,11 +16,11 @@ VSVersionInfo(
         '040904B0',
         [
           StringStruct('FileDescription', 'AMConnectGDT'),
-          StringStruct('FileVersion', '1.0.7'),
+          StringStruct('FileVersion', '1.0.8'),
           StringStruct('InternalName', 'AMConnectGDT'),
           StringStruct('OriginalFilename', 'AMConnectGDT.exe'),
           StringStruct('ProductName', 'AMConnectGDT'),
-          StringStruct('ProductVersion', '1.0.7')
+          StringStruct('ProductVersion', '1.0.8')
         ]
       )
     ]),

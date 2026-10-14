@@ -37,3 +37,30 @@ Máy Windows 7 32-bit không chạy được bản x64. Trường hợp đó ph�
 
 Windows 7 nên được cài đầy đủ bản cập nhật hệ thống, Universal C Runtime, chứng
 chỉ gốc và TLS 1.2 để kết nối HTTPS tới GDT.
+
+## Sửa lỗi tải detail chậm / HTTP 429 (từ v1.0.8)
+
+- Mặc định tải 3 detail song song (`DETAIL_WORKERS=3`) và thử mỗi detail tối đa 2 lần.
+- Timeout mỗi request detail mặc định 25 giây; số lần thử này **không** áp dụng cho API danh sách/XML.
+- Khi GDT trả 429, các worker dùng chung một cooldown 10 giây và tạm giảm về 1 detail đồng thời. Sau 10 detail thành công liên tiếp, agent khôi phục mức 3 worker.
+- Khi gặp 4 lỗi 429 liên tiếp **hoặc** 3 detail liên tiếp lỗi kết nối, agent dừng lấy thêm và trả các hóa đơn chưa tải dưới dạng partial.
+- Giới hạn tổng thời gian mỗi batch mặc định là 3600 giây; chỉnh `DETAIL_BATCH_TIMEOUT` khi cần.
+
+**Lưu ý tích hợp AMNote:** `/fetch-invoice-details` và `/fetch-all-invoice`
+vẫn trả HTTP **207** và `{"success": false, "partial": true, ...}` khi có lỗi.
+Không được bỏ qua `items` chỉ vì `success=false`: các hóa đơn thành công
+vẫn chứa `detail`, hóa đơn lỗi chứa `detail=null` và
+`detail_error_code` (`DETAIL_FETCH_FAILED`, `GDT_RATE_LIMITED`,
+`GDT_UNAVAILABLE` hoặc `DETAIL_BATCH_TIMEOUT`).
+Có thể gọi lại `/fetch-invoice-details` **chỉ với các phần tử lỗi** sau khi
+GDT phục hồi, tránh tải lại toàn bộ.
+
+**Triển khai:** Cần build lại `AMConnectGDT.exe` bằng script trên và thay
+file EXE đang sử dụng. Commit source không tự nâng cấp file EXE đã cài.
+Không dùng EXE/version.json cũ trong thư mục dist làm bằng chứng rằng
+bản 1.0.8 đã được triển khai. Nên sao lưu EXE cũ trước khi thay thế.
+
+**Kiểm thử source:** `python -m unittest discover -s tests -p "test_*.py" -v`
+(chạy từ thư mục `agent`, yêu cầu cài `aiohttp` và `curl_cffi`).
+Đã bổ sung GitHub Actions kiểm tra cú pháp và logic không cần kết nối GDT
+trên Python 3.8 và 3.11. Vẫn cần xác nhận thực tế với tài khoản GDT hợp lệ.
