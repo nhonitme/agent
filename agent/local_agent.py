@@ -163,6 +163,7 @@ DETAIL_MAX_ATTEMPTS       = int(os.getenv("DETAIL_MAX_ATTEMPTS", "2"))
 DETAIL_REQUEST_TIMEOUT    = float(os.getenv("DETAIL_REQUEST_TIMEOUT", "25"))
 DETAIL_429_COOLDOWN       = float(os.getenv("DETAIL_429_COOLDOWN", "10"))
 DETAIL_429_ABORT_AFTER    = int(os.getenv("DETAIL_429_ABORT_AFTER", "4"))
+DETAIL_TRANSPORT_ABORT_AFTER = int(os.getenv("DETAIL_TRANSPORT_ABORT_AFTER", "3"))
 DETAIL_BATCH_TIMEOUT      = float(os.getenv("DETAIL_BATCH_TIMEOUT", "3600"))
 
 _LOOPBACK_HOSTS = {"127.0.0.1", "::1", "localhost"}
@@ -185,6 +186,7 @@ if (
     or DETAIL_REQUEST_TIMEOUT <= 0
     or DETAIL_429_COOLDOWN <= 0
     or not 2 <= DETAIL_429_ABORT_AFTER <= 20
+    or not 2 <= DETAIL_TRANSPORT_ABORT_AFTER <= 20
     or DETAIL_BATCH_TIMEOUT <= 0
 ):
     raise RuntimeError(
@@ -193,7 +195,8 @@ if (
         "MAX_REQUEST_BODY_MB trong khoảng 1..50, GDT_PAGE_SIZE trong khoảng "
         "1..50 và HTTP_QUEUE_TIMEOUT phải lớn hơn 0. "
         "DETAIL_WORKERS 1..10, DETAIL_MAX_ATTEMPTS 1..5, "
-        "DETAIL_429_ABORT_AFTER 2..20; các timeout/cooldown phải > 0."
+        "DETAIL_429_ABORT_AFTER và DETAIL_TRANSPORT_ABORT_AFTER 2..20; "
+        "các timeout/cooldown phải > 0."
     )
 
 # ── GDT constants ──────────────────────────────────────────────────────────────
@@ -937,7 +940,11 @@ async def _gdt_get(
 
 
 class _DetailBatchPaused(RuntimeError):
-    """Stop new detail work after a sustained GDT rate limit."""
+    """Stop new detail work when GDT rate limits or becomes unavailable."""
+
+
+class _DetailTransportFailure(RuntimeError):
+    """GDT detail transport failed after its bounded retry budget."""
 
 
 class _DetailRateGate:
@@ -948,20 +955,24 @@ class _DetailRateGate:
         self.consecutive_429 = 0
         self.rate_limited = False
         self.paused = False
+        self.pause_code = ""
+        self.consecutive_transport_errors = 0
+        self.recovery_successes = 0
         self.serial_lock = asyncio.Lock()
 
     async def wait_ready(self) -> None:
         # Cooldown happens OUTSIDE _gdt_sem: a sleeping worker holds no GDT slot.
         if self.paused:
-            raise _DetailBatchPaused("GDT liên tục trả HTTP 429; tạm dừng lấy chi tiết")
+            raise _DetailBatchPaused(self.pause_code)
         remaining = self.cooldown_until - asyncio.get_running_loop().time()
         if remaining > 0:
             await asyncio.sleep(remaining)
         if self.paused:
-            raise _DetailBatchPaused("GDT liên tục trả HTTP 429; tạm dừng lấy chi tiết")
+            raise _DetailBatchPaused(self.pause_code)
 
     def on_429(self) -> None:
         self.rate_limited = True
+        self.recovery_successes = 0
         self.consecutive_429 += 1
         self.cooldown_until = max(
             self.cooldown_until,
@@ -969,9 +980,25 @@ class _DetailRateGate:
         )
         if self.consecutive_429 >= DETAIL_429_ABORT_AFTER:
             self.paused = True
+            self.pause_code = "GDT_RATE_LIMITED"
+
+    def on_transport_error(self) -> None:
+        self.consecutive_transport_errors += 1
+        if self.consecutive_transport_errors >= DETAIL_TRANSPORT_ABORT_AFTER:
+            self.paused = True
+            self.pause_code = "GDT_UNAVAILABLE"
 
     def on_success(self) -> None:
         self.consecutive_429 = 0
+        self.consecutive_transport_errors = 0
+        if self.rate_limited:
+            self.recovery_successes += 1
+            if self.recovery_successes >= 10:
+                # Gradual recovery: return to the small worker pool after
+                # 10 consecutive successful serialized requests.
+                self.rate_limited = False
+                self.recovery_successes = 0
+                log.info("GDT detail ổn định sau 10 HĐ; khôi phục worker pool")
 
 
 async def _gdt_get_detail(
@@ -1016,7 +1043,7 @@ async def _gdt_get_detail(
                     DETAIL_MAX_ATTEMPTS, exc,
                 )
                 if attempt + 1 >= DETAIL_MAX_ATTEMPTS:
-                    raise RuntimeError(
+                    raise _DetailTransportFailure(
                         _t("gdt_request_failed", attempts=DETAIL_MAX_ATTEMPTS, error=exc)
                     ) from exc
                 await asyncio.sleep(1)
@@ -1394,7 +1421,15 @@ async def _fetch_invoice_details_core(
                     data = await _gdt_get_detail(url, username, password, gate)
                     _record(index, data)
                 except _DetailBatchPaused:
-                    _record(index, None, "GDT_RATE_LIMITED")
+                    _record(index, None, gate.pause_code or "GDT_RATE_LIMITED")
+                except _DetailTransportFailure as exc:
+                    gate.on_transport_error()
+                    log.warning(
+                        "[%s] Detail lỗi kết nối liên tiếp (%d/%d): %s",
+                        _log_subject(username), gate.consecutive_transport_errors,
+                        DETAIL_TRANSPORT_ABORT_AFTER, type(exc).__name__,
+                    )
+                    _record(index, None, "DETAIL_FETCH_FAILED")
                 except Exception as exc:
                     log.warning(
                         "[%s] Không lấy được chi tiết HĐ (%s)",
@@ -1419,7 +1454,7 @@ async def _fetch_invoice_details_core(
     # Do not silently drop invoices when the circuit breaker or deadline fires.
     # Any not-yet-started/in-flight item is returned with an explicit error.
     remaining_code = (
-        "GDT_RATE_LIMITED" if gate.paused else "DETAIL_BATCH_TIMEOUT"
+        gate.pause_code if gate.paused else "DETAIL_BATCH_TIMEOUT"
     )
     for index, result in enumerate(results):
         if result is None:
