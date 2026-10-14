@@ -157,6 +157,13 @@ MAX_DETAIL_ITEMS    = int(os.getenv("MAX_DETAIL_ITEMS", "5000"))
 MAX_REQUEST_BODY_MB = int(os.getenv("MAX_REQUEST_BODY_MB", "16"))
 GDT_PAGE_SIZE       = int(os.getenv("GDT_PAGE_SIZE", "30"))
 GDT_CA_BUNDLE       = os.getenv("GDT_CA_BUNDLE", "").strip()
+# Detail workers are capped separately from the global GDT connection pool.
+DETAIL_WORKERS            = int(os.getenv("DETAIL_WORKERS", "3"))
+DETAIL_MAX_ATTEMPTS       = int(os.getenv("DETAIL_MAX_ATTEMPTS", "2"))
+DETAIL_REQUEST_TIMEOUT    = float(os.getenv("DETAIL_REQUEST_TIMEOUT", "25"))
+DETAIL_429_COOLDOWN       = float(os.getenv("DETAIL_429_COOLDOWN", "10"))
+DETAIL_429_ABORT_AFTER    = int(os.getenv("DETAIL_429_ABORT_AFTER", "4"))
+DETAIL_BATCH_TIMEOUT      = float(os.getenv("DETAIL_BATCH_TIMEOUT", "3600"))
 
 _LOOPBACK_HOSTS = {"127.0.0.1", "::1", "localhost"}
 if AGENT_HOST not in _LOOPBACK_HOSTS:
@@ -173,12 +180,20 @@ if (
     or not 1 <= MAX_REQUEST_BODY_MB <= 50
     or not 1 <= GDT_PAGE_SIZE <= 50
     or HTTP_QUEUE_TIMEOUT <= 0
+    or not 1 <= DETAIL_WORKERS <= 10
+    or not 1 <= DETAIL_MAX_ATTEMPTS <= 5
+    or DETAIL_REQUEST_TIMEOUT <= 0
+    or DETAIL_429_COOLDOWN <= 0
+    or not 2 <= DETAIL_429_ABORT_AFTER <= 20
+    or DETAIL_BATCH_TIMEOUT <= 0
 ):
     raise RuntimeError(
         "MAX_CONCURRENT phải trong khoảng 1..10, MAX_HTTP_CONCURRENT trong "
         "khoảng 1..100, MAX_DETAIL_ITEMS trong khoảng 1..20000, "
         "MAX_REQUEST_BODY_MB trong khoảng 1..50, GDT_PAGE_SIZE trong khoảng "
-        "1..50 và HTTP_QUEUE_TIMEOUT phải lớn hơn 0."
+        "1..50 và HTTP_QUEUE_TIMEOUT phải lớn hơn 0. "
+        "DETAIL_WORKERS 1..10, DETAIL_MAX_ATTEMPTS 1..5, "
+        "DETAIL_429_ABORT_AFTER 2..20; các timeout/cooldown phải > 0."
     )
 
 # ── GDT constants ──────────────────────────────────────────────────────────────
@@ -921,6 +936,124 @@ async def _gdt_get(
     raise RuntimeError(_t("token_expired"))
 
 
+class _DetailBatchPaused(RuntimeError):
+    """Stop new detail work after a sustained GDT rate limit."""
+
+
+class _DetailRateGate:
+    """One shared cooldown and circuit breaker for all workers in a detail batch."""
+
+    def __init__(self) -> None:
+        self.cooldown_until = 0.0
+        self.consecutive_429 = 0
+        self.rate_limited = False
+        self.paused = False
+        self.serial_lock = asyncio.Lock()
+
+    async def wait_ready(self) -> None:
+        # Cooldown happens OUTSIDE _gdt_sem: a sleeping worker holds no GDT slot.
+        if self.paused:
+            raise _DetailBatchPaused("GDT liên tục trả HTTP 429; tạm dừng lấy chi tiết")
+        remaining = self.cooldown_until - asyncio.get_running_loop().time()
+        if remaining > 0:
+            await asyncio.sleep(remaining)
+        if self.paused:
+            raise _DetailBatchPaused("GDT liên tục trả HTTP 429; tạm dừng lấy chi tiết")
+
+    def on_429(self) -> None:
+        self.rate_limited = True
+        self.consecutive_429 += 1
+        self.cooldown_until = max(
+            self.cooldown_until,
+            asyncio.get_running_loop().time() + DETAIL_429_COOLDOWN,
+        )
+        if self.consecutive_429 >= DETAIL_429_ABORT_AFTER:
+            self.paused = True
+
+    def on_success(self) -> None:
+        self.consecutive_429 = 0
+
+
+async def _gdt_get_detail(
+    url: str, username: str, password: str, gate: _DetailRateGate
+) -> dict:
+    """Bounded detail retries; shared cooldown and serialized requests after a 429."""
+    subject = _log_subject(username)
+    for login_round in range(2):
+        token = await _get_token(username, password)
+        if not token:
+            raise RuntimeError(_t("login_failed"))
+        token_expired = False
+
+        for attempt in range(DETAIL_MAX_ATTEMPTS):
+            async def _request_once() -> tuple[int, Optional[dict]]:
+                headers = _gdt_headers(**{
+                    "Authorization": f"Bearer {token}",
+                    "End-Point": "/tra-cuu/tra-cuu-hoa-don",
+                })
+                # Hold a semaphore slot only for the actual HTTP request.
+                async with _gdt_sem:
+                    return await asyncio.wait_for(
+                        _read_gdt_json(url, headers),
+                        timeout=DETAIL_REQUEST_TIMEOUT,
+                    )
+
+            try:
+                await gate.wait_ready()
+                if gate.rate_limited:
+                    # After any 429, allow just one in-flight detail request per batch.
+                    async with gate.serial_lock:
+                        await gate.wait_ready()
+                        status_code, data = await _request_once()
+                else:
+                    status_code, data = await _request_once()
+            except _DetailBatchPaused:
+                raise
+            except Exception as exc:
+                log.warning(
+                    "[%s] Detail GET lỗi %s (lần %d/%d): %s",
+                    subject, type(exc).__name__, attempt + 1,
+                    DETAIL_MAX_ATTEMPTS, exc,
+                )
+                if attempt + 1 >= DETAIL_MAX_ATTEMPTS:
+                    raise RuntimeError(
+                        _t("gdt_request_failed", attempts=DETAIL_MAX_ATTEMPTS, error=exc)
+                    ) from exc
+                await asyncio.sleep(1)
+                continue
+
+            if status_code == 429:
+                gate.on_429()
+                log.warning(
+                    "[%s] Detail HTTP 429 (%d/%d); cooldown chung %.1fs, "
+                    "giảm về 1 request đồng thời",
+                    subject, gate.consecutive_429, DETAIL_429_ABORT_AFTER,
+                    DETAIL_429_COOLDOWN,
+                )
+                if gate.paused:
+                    raise _DetailBatchPaused(
+                        "GDT liên tục trả HTTP 429; tạm dừng lấy chi tiết"
+                    )
+                if attempt + 1 >= DETAIL_MAX_ATTEMPTS:
+                    raise RuntimeError("GDT trả HTTP 429; có thể thử lại chi tiết sau")
+                continue
+
+            if status_code == 401:
+                _token_cache.pop(username, None)
+                token_expired = True
+                log.warning("[%s] Detail token hết hạn (401), đăng nhập lại", subject)
+                break
+
+            if not isinstance(data, dict) or "path" in data:
+                raise RuntimeError(_t("detail_invalid"))
+            gate.on_success()
+            return data
+
+        if not token_expired:
+            break
+    raise RuntimeError(_t("token_expired"))
+
+
 async def _gdt_get_bytes(
     url: str,
     username: str,
@@ -1199,80 +1332,99 @@ async def _fetch_invoice_details_core(
     items: list[dict],
     progress_action: str,
 ) -> tuple[list[dict], int]:
-    """Lấy detail song song cho mảng summary, giữ nguyên thứ tự đầu vào."""
+    """Bounded worker queue, preserving input order and successful partial results."""
     total = len(items)
-    done_count = [0]
-    failed_count = [0]
+    done_count = 0
+    failed_count = 0
+    results: list[Optional[dict]] = [None] * total
+    gate = _DetailRateGate()
+    queue: asyncio.Queue[int] = asyncio.Queue()
+    for index in range(total):
+        queue.put_nowait(index)
 
-    async def _fetch_one(inv: dict) -> dict:
-        khhdon = str(inv.get("khhdon", ""))
-        nbmst = str(inv.get("nbmst", ""))
-        shdon = str(inv.get("shdon", ""))
-        khmshdon = str(inv.get("khmshdon", ""))
-        current = f"{khhdon}-{shdon}"
-        url = _detail_url(khhdon, nbmst, shdon, khmshdon)
-        try:
-            async with _gdt_sem:
-                data = await _gdt_get(url, username, password)
-                # Delay ngắn để giảm 429; tránh 0.3s/HĐ làm chậm batch lớn.
-                await asyncio.sleep(0.05)
-            if not isinstance(data, dict) or "path" in data:
-                raise RuntimeError(_t("detail_invalid"))
-            done_count[0] += 1
-            _set_progress(
-                username,
-                status="fetching_detail",
-                action=progress_action,
-                phase="detail",
-                phase_label=_t("detail_phase"),
-                total_found=total,
-                detail_done=done_count[0],
-                detail_total=total,
-                detail_failed=failed_count[0],
-                current_inv=current,
-                message=_t(
-                    "detail_progress",
-                    done=done_count[0],
-                    total=total,
-                    current=current,
-                ),
-            )
-            return {**inv, "detail": data, "detail_error": None}
-        except Exception as e:
-            done_count[0] += 1
-            failed_count[0] += 1
-            _set_progress(
-                username,
-                status="fetching_detail",
-                action=progress_action,
-                phase="detail",
-                phase_label=_t("detail_phase"),
-                total_found=total,
-                detail_done=done_count[0],
-                detail_total=total,
-                detail_failed=failed_count[0],
-                current_inv="",
-                message=_t(
-                    "detail_error_progress",
-                    done=done_count[0],
-                    total=total,
-                    failed=failed_count[0],
-                ),
-            )
-            log.warning(
-                "[%s] Không lấy được chi tiết một hóa đơn (%s)",
-                _log_subject(username),
-                type(e).__name__,
-            )
-            return {
-                **inv,
-                "detail": None,
-                "detail_error": _t("detail_fetch_failed"),
-            }
+    def _record(index: int, data: Optional[dict], error_code: str = "") -> None:
+        nonlocal done_count, failed_count
+        inv = items[index]
+        done_count += 1
+        if error_code:
+            failed_count += 1
+        result = {
+            **inv,
+            "detail": data,
+            "detail_error": _t("detail_fetch_failed") if error_code else None,
+        }
+        if error_code:
+            # Existing clients can keep checking detail_error/detail is None;
+            # new clients can selectively resubmit only failed items.
+            result["detail_error_code"] = error_code
+        results[index] = result
+        current = f"{inv.get('khhdon', '')}-{inv.get('shdon', '')}"
+        _set_progress(
+            username,
+            status="fetching_detail",
+            action=progress_action,
+            phase="detail",
+            phase_label=_t("detail_phase"),
+            total_found=total,
+            detail_done=done_count,
+            detail_total=total,
+            detail_failed=failed_count,
+            current_inv=current if not error_code else "",
+            message=(
+                _t("detail_error_progress",
+                   done=done_count, total=total, failed=failed_count)
+                if error_code else
+                _t("detail_progress", done=done_count, total=total, current=current)
+            ),
+        )
 
-    results = await asyncio.gather(*(_fetch_one(item) for item in items))
-    return list(results), failed_count[0]
+    async def _worker() -> None:
+        while not gate.paused:
+            try:
+                index = queue.get_nowait()
+            except asyncio.QueueEmpty:
+                return
+            try:
+                inv = items[index]
+                url = _detail_url(
+                    str(inv.get("khhdon", "")), str(inv.get("nbmst", "")),
+                    str(inv.get("shdon", "")), str(inv.get("khmshdon", "")),
+                )
+                try:
+                    data = await _gdt_get_detail(url, username, password, gate)
+                    _record(index, data)
+                except _DetailBatchPaused:
+                    _record(index, None, "GDT_RATE_LIMITED")
+                except Exception as exc:
+                    log.warning(
+                        "[%s] Không lấy được chi tiết HĐ (%s)",
+                        _log_subject(username), type(exc).__name__,
+                    )
+                    _record(index, None, "DETAIL_FETCH_FAILED")
+            finally:
+                queue.task_done()
 
+    worker_count = min(total, DETAIL_WORKERS, MAX_CONCURRENT)
+    try:
+        await asyncio.wait_for(
+            asyncio.gather(*(_worker() for _ in range(worker_count))),
+            timeout=DETAIL_BATCH_TIMEOUT,
+        )
+    except asyncio.TimeoutError:
+        log.warning(
+            "[%s] Detail batch quá thời gian %.1fs; trả về dữ liệu partial",
+            _log_subject(username), DETAIL_BATCH_TIMEOUT,
+        )
+
+    # Do not silently drop invoices when the circuit breaker or deadline fires.
+    # Any not-yet-started/in-flight item is returned with an explicit error.
+    remaining_code = (
+        "GDT_RATE_LIMITED" if gate.paused else "DETAIL_BATCH_TIMEOUT"
+    )
+    for index, result in enumerate(results):
+        if result is None:
+            _record(index, None, remaining_code)
+    return [result for result in results if result is not None], failed_count
 
 # ══════════════════════════════════════════════════════════════════════════════
 # HTTP Handlers
@@ -1333,6 +1485,8 @@ async def handle_health(request: web.Request) -> web.Response:
         "host":           AGENT_HOST,
         "port":           AGENT_PORT,
         "max_concurrent": MAX_CONCURRENT,
+        "detail_workers": min(DETAIL_WORKERS, MAX_CONCURRENT),
+        "detail_max_attempts": DETAIL_MAX_ATTEMPTS,
         "gdt_page_size":  GDT_PAGE_SIZE,
         "active_jobs":    len(_active_usernames),
     })
@@ -2058,6 +2212,8 @@ async def _amain() -> None:
     log.info("AMnote GDT")
     log.info("  Port          : %d", AGENT_PORT)
     log.info("  Max concurrent: %d", MAX_CONCURRENT)
+    log.info("  Detail workers: %d", min(MAX_CONCURRENT, DETAIL_WORKERS))
+    log.info("  Detail retries: %d attempts, %.1fs timeout", DETAIL_MAX_ATTEMPTS, DETAIL_REQUEST_TIMEOUT)
     log.info("  GDT page size : %d", GDT_PAGE_SIZE)
     log.info("  Max HTTP      : %d", MAX_HTTP_CONCURRENT)
     log.info("  Log file      : %s", _log_file)
