@@ -1,0 +1,70 @@
+2026-07-28 16:21:56 [INFO] =======================================================
+2026-07-28 16:21:56 [INFO] AMnote GDT
+2026-07-28 16:21:56 [INFO]   Port          : 8099
+2026-07-28 16:21:56 [INFO]   Max concurrent: 10
+2026-07-28 16:21:56 [INFO]   GDT page size : 30
+2026-07-28 16:21:56 [INFO]   Max HTTP      : 10
+2026-07-28 16:21:56 [INFO]   Log file      : D:\AMNOTE\GDTTool\agent\dist\win7-win11-x64\agent.log
+2026-07-28 16:21:56 [INFO] =======================================================
+2026-07-28 16:21:56 [INFO] Agent sẵn sàng tại http://127.0.0.1:8099
+2026-07-28 16:21:56 [INFO] System tray icon đã khởi động
+2026-07-28 16:23:48 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/captcha "HTTP/1.1 200 OK"
+2026-07-28 16:23:48 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/captcha "HTTP/1.1 200 OK"
+2026-07-28 16:23:48 [INFO] HTTP Request: POST https://hoadondientu.gdt.gov.vn/api/security-taxpayer/authenticate "HTTP/1.1 200 OK"
+2026-07-28 16:23:48 [INFO] [user:1d789ad66bcf] Đăng nhập GDT OK (lần 1)
+2026-07-28 16:23:56 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/captcha "HTTP/1.1 200 OK"
+2026-07-28 16:23:56 [INFO] HTTP Request: POST https://hoadondientu.gdt.gov.vn/api/security-taxpayer/authenticate "HTTP/1.1 401 Unauthorized"
+2026-07-28 16:23:56 [ERROR] [user:7c6ac453290f] GDT từ chối đăng nhập: Tên đăng nhập hoặc mật khẩu không đúng
+2026-07-28 16:27:40 [INFO] [user:1d789ad66bcf] Tải XML: https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=1
+2026-07-28 16:27:40 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=1 "HTTP/1.1 200 OK"
+2026-07-28 16:32:19 [INFO] [user:1d789ad66bcf] Tải XML: https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=1
+2026-07-28 16:32:19 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=1 "HTTP/1.1 200 OK"
+2026-07-28 17:27:45 [INFO] =======================================================
+2026-07-28 17:27:45 [INFO] AMnote GDT
+2026-07-28 17:27:45 [INFO]   Port          : 8099
+2026-07-28 17:27:45 [INFO]   Max concurrent: 10
+2026-07-28 17:27:45 [INFO]   GDT page size : 30
+2026-07-28 17:27:45 [INFO]   Max HTTP      : 10
+2026-07-28 17:27:45 [INFO]   Log file      : D:\AMNOTE\GDTTool\agent\dist\win7-win11-x64\agent.log
+2026-07-28 17:27:45 [INFO] =======================================================
+2026-07-28 17:27:45 [INFO] Agent sẵn sàng tại http://127.0.0.1:8099
+2026-07-28 17:27:45 [INFO] System tray icon đã khởi động
+2026-07-28 17:27:48 [INFO] [user:1d789ad66bcf] Tải XML: https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=1
+2026-07-28 17:27:48 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/captcha "HTTP/1.1 200 OK"
+2026-07-28 17:27:48 [INFO] HTTP Request: POST https://hoadondientu.gdt.gov.vn/api/security-taxpayer/authenticate "HTTP/1.1 401 Unauthorized"
+2026-07-28 17:27:48 [WARNING] [user:1d789ad66bcf] Captcha sai, thử lại 1/5...
+2026-07-28 17:27:48 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/captcha "HTTP/1.1 200 OK"
+2026-07-28 17:27:48 [INFO] HTTP Request: POST https://hoadondientu.gdt.gov.vn/api/security-taxpayer/authenticate "HTTP/1.1 401 Unauthorized"
+2026-07-28 17:27:48 [WARNING] [user:1d789ad66bcf] Captcha sai, thử lại 2/5...
+2026-07-28 17:27:49 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/captcha "HTTP/1.1 200 OK"
+2026-07-28 17:27:49 [INFO] HTTP Request: POST https://hoadondientu.gdt.gov.vn/api/security-taxpayer/authenticate "HTTP/1.1 200 OK"
+2026-07-28 17:27:49 [INFO] [user:1d789ad66bcf] Đăng nhập GDT OK (lần 3)
+2026-07-28 17:27:49 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=1 "HTTP/1.1 200 OK"
+2026-07-28 17:27:53 [INFO] [user:1d789ad66bcf] Tải XML: https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=12
+2026-07-28 17:27:53 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=12 "HTTP/1.1 500 Internal Server Error"
+2026-07-28 17:27:53 [WARNING] [user:1d789ad66bcf] GDT GET bytes lỗi HTTPStatusError (lần 1/5): Server error '500 Internal Server Error' for url 'https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=12'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+2026-07-28 17:27:54 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=12 "HTTP/1.1 500 Internal Server Error"
+2026-07-28 17:27:54 [WARNING] [user:1d789ad66bcf] GDT GET bytes lỗi HTTPStatusError (lần 2/5): Server error '500 Internal Server Error' for url 'https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=12'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+2026-07-28 17:27:56 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=12 "HTTP/1.1 500 Internal Server Error"
+2026-07-28 17:27:56 [WARNING] [user:1d789ad66bcf] GDT GET bytes lỗi HTTPStatusError (lần 3/5): Server error '500 Internal Server Error' for url 'https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=12'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+2026-07-28 17:28:00 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=12 "HTTP/1.1 500 Internal Server Error"
+2026-07-28 17:28:00 [WARNING] [user:1d789ad66bcf] GDT GET bytes lỗi HTTPStatusError (lần 4/5): Server error '500 Internal Server Error' for url 'https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=12'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+2026-07-28 17:28:08 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=12 "HTTP/1.1 500 Internal Server Error"
+2026-07-28 17:28:08 [WARNING] [user:1d789ad66bcf] GDT GET bytes lỗi HTTPStatusError (lần 5/5): Server error '500 Internal Server Error' for url 'https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=12'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+2026-07-28 17:28:08 [ERROR] [user:1d789ad66bcf] Tải XML thất bại: Kết nối thuế thất bại sau 5 lần thử: Server error '500 Internal Server Error' for url 'https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=12'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+2026-09-16 10:26:37 [INFO] =======================================================
+2026-09-16 10:26:37 [INFO] AMnote GDT
+2026-09-16 10:26:37 [INFO]   Port          : 8099
+2026-09-16 10:26:37 [INFO]   Max concurrent: 10
+2026-09-16 10:26:37 [INFO]   GDT page size : 30
+2026-09-16 10:26:37 [INFO]   Max HTTP      : 10
+2026-09-16 10:26:37 [INFO]   Log file      : D:\AMNOTE\GDTToolpass\GDTTool\agent\dist\win7-win11-x64\agent.log
+2026-09-16 10:26:37 [INFO] =======================================================
+2026-09-16 10:26:37 [INFO] Agent sẵn sàng tại http://127.0.0.1:8099
+2026-09-16 10:26:37 [INFO] System tray icon đã khởi động

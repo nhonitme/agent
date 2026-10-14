@@ -1,0 +1,7 @@
+{
+  "version_exe": "1.0.4.0",
+  "version_env": "1.0.3.0",
+  "exe_url": "https://amnote.com.vn/wp-content/uploads/dowload/gdt/AMConnectGDT.exe",
+  "env_url": "https://amnote.com.vn/wp-content/uploads/dowload/gdt/config.env",
+  "required": false
+}

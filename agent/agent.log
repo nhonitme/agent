@@ -1,0 +1,60 @@
+2026-07-24 08:22:16 [INFO] 127.0.0.1 [24/Jul/2026:08:22:16 +0700] "GET /health HTTP/1.1" 401 294 "-" "Python/3.14 aiohttp/3.14.2"
+2026-07-24 08:22:16 [INFO] 127.0.0.1 [24/Jul/2026:08:22:16 +0700] "GET /health HTTP/1.1" 200 337 "-" "Python/3.14 aiohttp/3.14.2"
+2026-07-24 08:22:16 [INFO] 127.0.0.1 [24/Jul/2026:08:22:16 +0700] "POST /fetch-all-invoice HTTP/1.1" 415 345 "-" "Python/3.14 aiohttp/3.14.2"
+2026-07-24 08:22:16 [INFO] 127.0.0.1 [24/Jul/2026:08:22:16 +0700] "POST /fetch-all-invoice HTTP/1.1" 400 370 "-" "Python/3.14 aiohttp/3.14.2"
+2026-07-24 08:22:16 [INFO] 127.0.0.1 [24/Jul/2026:08:22:16 +0700] "POST /fetch-all-invoice HTTP/1.1" 400 357 "-" "Python/3.14 aiohttp/3.14.2"
+2026-07-24 08:22:16 [INFO] 127.0.0.1 [24/Jul/2026:08:22:16 +0700] "POST /fetch-all-invoice HTTP/1.1" 409 377 "-" "Python/3.14 aiohttp/3.14.2"
+2026-07-24 08:22:29 [INFO] [user:a078250c0bd3] fetch-all-invoice: 2 HĐ unique, bắt đầu lấy chi tiết...
+2026-07-24 08:22:29 [WARNING] [user:a078250c0bd3] Không lấy được chi tiết một hóa đơn: GDT không trả về dữ liệu chi tiết hợp lệ
+2026-07-24 08:22:29 [INFO] [user:a078250c0bd3] fetch-all-invoice hoàn thành: 2 HĐ, 1 lỗi chi tiết, 20260701→20260731
+2026-07-24 08:22:30 [INFO] 127.0.0.1 [24/Jul/2026:08:22:29 +0700] "POST /fetch-all-invoice HTTP/1.1" 207 637 "-" "Python/3.14 aiohttp/3.14.2"
+2026-07-24 08:26:48 [INFO] 127.0.0.1 [24/Jul/2026:08:26:48 +0700] "GET /health HTTP/1.1" 401 382 "-" "Python/3.14 aiohttp/3.14.2"
+2026-07-24 08:26:48 [INFO] 127.0.0.1 [24/Jul/2026:08:26:48 +0700] "GET /health HTTP/1.1" 200 337 "-" "Python/3.14 aiohttp/3.14.2"
+2026-07-24 08:26:48 [INFO] 127.0.0.1 [24/Jul/2026:08:26:48 +0700] "POST /fetch-all-invoice HTTP/1.1" 400 353 "-" "Python/3.14 aiohttp/3.14.2"
+2026-07-24 09:57:44 [INFO] [user:691de9a61c6f] fetch-invoice-list hoàn thành: 2 HĐ 20260701→20260731
+2026-07-24 09:57:44 [INFO] 127.0.0.1 [24/Jul/2026:09:57:44 +0700] "POST /fetch-invoice-list HTTP/1.1" 200 466 "-" "Python/3.14 aiohttp/3.14.2"
+2026-07-24 09:57:44 [INFO] 127.0.0.1 [24/Jul/2026:09:57:44 +0700] "GET /progress/invoice-list?username=list-user HTTP/1.1" 200 557 "-" "Python/3.14 aiohttp/3.14.2"
+2026-07-24 09:57:44 [WARNING] [user:2dfda31c76c8] Không lấy được chi tiết một hóa đơn (RuntimeError)
+2026-07-24 09:57:44 [INFO] 127.0.0.1 [24/Jul/2026:09:57:44 +0700] "POST /fetch-invoice-details HTTP/1.1" 207 673 "-" "Python/3.14 aiohttp/3.14.2"
+2026-07-24 09:57:44 [INFO] 127.0.0.1 [24/Jul/2026:09:57:44 +0700] "GET /progress/invoice-details?username=detail-user HTTP/1.1" 200 594 "-" "Python/3.14 aiohttp/3.14.2"
+2026-07-24 09:57:44 [INFO] 127.0.0.1 [24/Jul/2026:09:57:44 +0700] "POST /fetch-invoice-details HTTP/1.1" 400 329 "-" "Python/3.14 aiohttp/3.14.2"
+2026-07-24 09:57:44 [INFO] [user:b8d83be4fc78] fetch-all-invoice: 2 HĐ unique, bắt đầu lấy chi tiết...
+2026-07-24 09:57:44 [WARNING] [user:b8d83be4fc78] Không lấy được chi tiết một hóa đơn (RuntimeError)
+2026-07-24 09:57:44 [INFO] [user:b8d83be4fc78] fetch-all-invoice hoàn thành: 2 HĐ, 1 lỗi chi tiết, 20260701→20260731
+2026-07-24 09:57:44 [INFO] 127.0.0.1 [24/Jul/2026:09:57:44 +0700] "POST /fetch-all-invoice HTTP/1.1" 207 673 "-" "Python/3.14 aiohttp/3.14.2"
+2026-07-24 10:13:30 [INFO] 127.0.0.1 [24/Jul/2026:10:13:30 +0700] "GET /progress/invoice-list?username=tax-user HTTP/1.1" 200 440 "-" "Python/3.14 aiohttp/3.14.2"
+2026-07-24 10:13:30 [INFO] 127.0.0.1 [24/Jul/2026:10:13:30 +0700] "GET /progress/invoice-list?username=unknown HTTP/1.1" 200 388 "-" "Python/3.14 aiohttp/3.14.2"
+2026-07-24 10:15:54 [INFO] 127.0.0.1 [24/Jul/2026:10:15:54 +0700] "GET /progress/invoice-list?username=tax-user HTTP/1.1" 200 483 "-" "Python/3.14 aiohttp/3.14.2"
+2026-07-24 10:15:54 [INFO] 127.0.0.1 [24/Jul/2026:10:15:54 +0700] "GET /progress/invoice-list?username=unknown HTTP/1.1" 200 430 "-" "Python/3.14 aiohttp/3.14.2"
+2026-07-24 10:43:50 [INFO] 127.0.0.1 [24/Jul/2026:10:43:50 +0700] "GET /health HTTP/1.1" 200 337 "-" "Python/3.14 aiohttp/3.14.2"
+2026-07-24 10:43:50 [INFO] 127.0.0.1 [24/Jul/2026:10:43:50 +0700] "GET /health HTTP/1.1" 200 337 "-" "Python/3.14 aiohttp/3.14.2"
+2026-07-27 11:40:36 [WARNING] GDT đóng stream thiếu chunk kết thúc; đã khôi phục JSON hợp lệ (26 bytes)
+2026-07-27 11:40:36 [WARNING] [user:04f8996da763] GDT ngắt response danh sách; giảm page size 20 → 10 và tải lại nguồn
+2026-07-27 11:40:36 [WARNING] [user:04f8996da763] GDT ngắt response danh sách; giảm page size 10 → 5 và tải lại nguồn
+2026-07-28 10:57:08 [WARNING] [user:04f8996da763] GDT GET lỗi ConnectError (lần 1/3): mock connect failed
+2026-07-28 10:57:08 [WARNING] [user:04f8996da763] GDT GET lỗi ConnectError (lần 2/3): mock connect failed
+2026-07-28 10:57:08 [WARNING] [user:04f8996da763] GDT GET lỗi ConnectError (lần 3/3): mock connect failed
+2026-07-28 10:57:31 [WARNING] [user:04f8996da763] GDT GET lỗi ConnectError (lần 1/3): mock connect failed
+2026-07-28 10:57:31 [WARNING] [user:04f8996da763] GDT GET lỗi ConnectError (lần 2/3): mock connect failed
+2026-07-28 10:57:31 [WARNING] [user:04f8996da763] GDT GET lỗi ConnectError (lần 3/3): mock connect failed
+2026-09-16 08:42:35 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/captcha "HTTP/1.1 200 OK"
+2026-09-16 08:42:35 [INFO] HTTP Request: POST https://hoadondientu.gdt.gov.vn/api/security-taxpayer/authenticate "HTTP/1.1 403 Forbidden"
+2026-09-16 08:42:35 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/captcha "HTTP/1.1 200 OK"
+2026-09-16 08:42:35 [INFO] HTTP Request: POST https://hoadondientu.gdt.gov.vn/api/security-taxpayer/authenticate "HTTP/1.1 403 Forbidden"
+2026-09-16 08:42:36 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/captcha "HTTP/1.1 200 OK"
+2026-09-16 08:42:36 [INFO] HTTP Request: POST https://hoadondientu.gdt.gov.vn/api/security-taxpayer/authenticate "HTTP/1.1 403 Forbidden"
+2026-09-16 08:42:36 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/captcha "HTTP/1.1 200 OK"
+2026-09-16 08:42:36 [INFO] HTTP Request: POST https://hoadondientu.gdt.gov.vn/api/security-taxpayer/authenticate "HTTP/1.1 403 Forbidden"
+2026-09-16 08:42:36 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/captcha "HTTP/1.1 200 OK"
+2026-09-16 08:42:36 [INFO] HTTP Request: POST https://hoadondientu.gdt.gov.vn/api/security-taxpayer/authenticate "HTTP/1.1 403 Forbidden"
+2026-09-16 08:43:16 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/_next/static/chunks/pages/_app-5a7fe34f2ba213d5.js "HTTP/1.1 200 OK"
+2026-09-16 08:43:17 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/captcha "HTTP/1.1 200 OK"
+2026-09-16 08:43:17 [INFO] HTTP Request: POST https://hoadondientu.gdt.gov.vn/api/security-taxpayer/authenticate "HTTP/1.1 401 Unauthorized"
+2026-09-16 08:43:17 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/captcha "HTTP/1.1 200 OK"
+2026-09-16 08:43:17 [INFO] HTTP Request: POST https://hoadondientu.gdt.gov.vn/api/security-taxpayer/authenticate "HTTP/1.1 401 Unauthorized"
+2026-09-16 08:44:37 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/captcha "HTTP/1.1 200 OK"
+2026-09-16 08:44:43 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/captcha "HTTP/1.1 200 OK"
+2026-09-16 08:44:44 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/captcha "HTTP/1.1 200 OK"
+2026-09-16 08:44:48 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/captcha "HTTP/1.1 200 OK"
+2026-09-16 08:44:48 [INFO] HTTP Request: POST https://hoadondientu.gdt.gov.vn/api/security-taxpayer/authenticate "HTTP/1.1 401 Unauthorized"
+2026-09-16 08:44:49 [INFO] HTTP Request: POST https://hoadondientu.gdt.gov.vn/api/security-taxpayer/authenticate "HTTP/1.1 403 Forbidden"
