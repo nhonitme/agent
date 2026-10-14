@@ -25,6 +25,7 @@ class DetailTests(unittest.IsolatedAsyncioTestCase):
             for name in (
                 "DETAIL_WORKERS", "DETAIL_MAX_ATTEMPTS", "DETAIL_REQUEST_TIMEOUT",
                 "DETAIL_429_COOLDOWN", "DETAIL_429_ABORT_AFTER",
+                "DETAIL_TRANSPORT_ABORT_AFTER",
                 "DETAIL_BATCH_TIMEOUT",
             )
         }
@@ -33,6 +34,7 @@ class DetailTests(unittest.IsolatedAsyncioTestCase):
         agent.DETAIL_REQUEST_TIMEOUT = 0.02
         agent.DETAIL_429_COOLDOWN = 0.01
         agent.DETAIL_429_ABORT_AFTER = 4
+        agent.DETAIL_TRANSPORT_ABORT_AFTER = 3
         agent.DETAIL_BATCH_TIMEOUT = 5
         agent._gdt_sem = asyncio.Semaphore(10)
         agent._token_cache.clear()
@@ -150,6 +152,35 @@ class DetailTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(
             all(r.get("detail_error_code") == "DETAIL_BATCH_TIMEOUT" for r in rows)
         )
+
+    async def test_repeated_transport_errors_pause_batch(self):
+        requests = 0
+
+        async def offline(url, username, password, gate):
+            nonlocal requests
+            requests += 1
+            raise agent._DetailTransportFailure("GDT unavailable")
+
+        with patch.object(agent, "_gdt_get_detail", new=offline):
+            rows, failed = await agent._fetch_invoice_details_core(
+                "demo", "pass", _items(30), "fetch-invoice-details"
+            )
+        self.assertEqual(failed, 30)
+        self.assertLess(requests, 30)
+        self.assertTrue(
+            any(row.get("detail_error_code") == "GDT_UNAVAILABLE"
+                for row in rows)
+        )
+
+    async def test_rate_limiter_restores_workers_after_ten_successes(self):
+        gate = agent._DetailRateGate()
+        gate.on_429()
+        self.assertTrue(gate.rate_limited)
+        for _ in range(9):
+            gate.on_success()
+            self.assertTrue(gate.rate_limited)
+        gate.on_success()
+        self.assertFalse(gate.rate_limited)
 
 
 if __name__ == "__main__":
