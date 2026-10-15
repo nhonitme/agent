@@ -41,7 +41,7 @@ chỉ gốc và TLS 1.2 để kết nối HTTPS tới GDT.
 ## Sửa lỗi tải detail chậm / HTTP 429 (từ v1.0.8)
 
 - Mặc định tải 3 detail song song (`DETAIL_WORKERS=3`) và thử mỗi detail tối đa 2 lần.
-- Timeout mỗi request detail mặc định 25 giây; số lần thử này **không** áp dụng cho API danh sách/XML.
+- Timeout mỗi request detail mặc định 8 giây (2 lần thử, tối đa khoảng 17 giây nếu đều timeout); giới hạn này **không** áp dụng cho API danh sách/XML.
 - Khi GDT trả 429, các worker dùng chung một cooldown 10 giây và tạm giảm về 1 detail đồng thời. Sau 10 detail thành công liên tiếp, agent khôi phục mức 3 worker.
 - Khi gặp 4 lỗi 429 liên tiếp **hoặc** 3 detail liên tiếp lỗi kết nối, agent dừng lấy thêm và trả các hóa đơn chưa tải dưới dạng partial.
 - Giới hạn tổng thời gian mỗi batch mặc định là 3600 giây; chỉnh `DETAIL_BATCH_TIMEOUT` khi cần.
