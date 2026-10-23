@@ -38,6 +38,19 @@ Máy Windows 7 32-bit không chạy được bản x64. Trường hợp đó ph�
 Windows 7 nên được cài đầy đủ bản cập nhật hệ thống, Universal C Runtime, chứng
 chỉ gốc và TLS 1.2 để kết nối HTTPS tới GDT.
 
+## Thông báo nguồn bị bỏ qua cho client (v1.0.9)
+
+- `/fetch-invoice-list` và `/fetch-all-invoice` trả thêm `skipped_sources`: mỗi phần tử có `source`, `source_name`, `type_search`, `reason_code`, `message` và `page` nếu lỗi phản hồi tại một trang. Mảng rỗng nếu không bỏ qua nguồn nào.
+- Trường `message` của phản hồi tổng hợp thông báo để client hiển thị, bao gồm: “Nếu quý khách hàng không xuất loại hóa đơn này thì có thể bỏ qua”. Cảnh báo áp dụng cả nguồn bị bỏ qua do ngoại lệ khác hoặc dừng giữa chừng khi GDT trả lỗi; các trang đã lấy thành công trong trường hợp sau vẫn được giữ lại.
+- Giữ nguyên quy tắc HTTP/`success` hiện tại: bỏ qua nguồn không tự đổi kết quả thành lỗi; client cần đọc `skipped_sources` để biết danh sách chưa đầy đủ. Lỗi chi tiết vẫn trả HTTP 207 như trước.
+
+## Bỏ qua nguồn máy tính tiền lỗi kết nối (v1.0.9)
+
+- Timeout HTTP mặc định là 10 giây. API danh sách vẫn thử tối đa 3 lần cho mỗi trang; đây không phải giới hạn tổng thời gian quét một nguồn.
+- Khi nguồn máy tính tiền (`sco-query`) gặp `_GDTTransportError` sau 3 lần thử một trang, agent ghi log và bỏ qua nguồn đó để tiếp tục tiến trình.
+- Áp dụng cho `/fetch-invoice-list` và bước lấy danh sách của `/fetch-all-invoice`; giữ kết quả các nguồn khác đã lấy thành công.
+- Tổng hóa đơn trả về không bao gồm nguồn máy tính tiền bị bỏ qua. Nguồn thông thường (`query`) vẫn báo lỗi khi hết số lần thử kết nối.
+
 ## Sửa lỗi tải detail chậm / HTTP 429 (từ v1.0.8)
 
 - Mặc định tải 3 detail song song (`DETAIL_WORKERS=3`) và thử mỗi detail tối đa 2 lần.

@@ -105,7 +105,7 @@ if os.path.exists(_env_file):
 # ── Phiên bản ứng dụng ──────────────────────────────────────────────────────
 # Fallback khi chạy .py (không có resource version trong file). Khi build .exe,
 # version thật được đọc trực tiếp từ metadata của AMConnectGDT.exe (version_info.txt).
-APP_VERSION_FALLBACK = "1.0.8"
+APP_VERSION_FALLBACK = "1.0.9"
 
 
 def _get_app_version() -> str:
@@ -436,6 +436,30 @@ _MESSAGES: dict[str, dict[str, str]] = {
         "KOR": "소스 {source_index}/{source_total} [{label}] 완료 — 검색 중...",
         "CHINA": "来源 {source_index}/{source_total} [{label}] 完成 — 正在查找...",
     },
+    "source_skipped": {
+        "VIET": "Đã bỏ qua nguồn [{label}]: {reason}. Nếu quý khách hàng không xuất loại hóa đơn này thì có thể bỏ qua",
+        "ENG": "Skipped source [{label}]: {reason}. If you do not issue this type of invoice, you may disregard this notice.",
+        "KOR": "소스 [{label}] 건너뜀: {reason}. 해당 유형의 세금계산서를 발행하지 않으시면 이 안내를 무시하셔도 됩니다.",
+        "CHINA": "已跳过来源 [{label}]：{reason}。如果您不开具此类发票，可以忽略此提示。",
+    },
+    "source_skip_transport": {
+        "VIET": "lỗi kết nối sau 3 lần thử",
+        "ENG": "connection failed after 3 attempts",
+        "KOR": "3회 시도 후 연결 실패",
+        "CHINA": "尝试3次后连接失败",
+    },
+    "source_skip_response": {
+        "VIET": "GDT trả về lỗi hoặc phản hồi không hợp lệ khi lấy danh sách",
+        "ENG": "GDT returned an error or invalid response while fetching the list",
+        "KOR": "목록 조회 중 GDT 오류 또는 잘못된 응답",
+        "CHINA": "获取列表时GDT返回错误或无效响应",
+    },
+    "source_skip_request": {
+        "VIET": "không thể hoàn tất yêu cầu lấy danh sách từ GDT",
+        "ENG": "could not complete the invoice list request to GDT",
+        "KOR": "GDT 목록 조회 요청을 완료할 수 없음",
+        "CHINA": "无法完成GDT发票列表请求",
+    },
     "sold": {
         "VIET": "bán ra",
         "ENG": "sales",
@@ -579,7 +603,7 @@ _gdt_verify = GDT_CA_BUNDLE if GDT_CA_BUNDLE else True
 _gdt = AsyncSession(
     impersonate=_GDT_IMPERSONATE,
     verify=_gdt_verify,
-    timeout=30,
+    timeout=10,
     max_clients=max(5, MAX_CONCURRENT),
 )
 
@@ -1140,6 +1164,7 @@ async def _fetch_all_pages(
     source_index: int = 0,
     source_total: int = 0,
     run_id: str = "",
+    source_errors: Optional[list[dict]] = None,
 ) -> list:
     """
     Phân trang tự động. Cập nhật _progress sau mỗi trang.
@@ -1178,8 +1203,8 @@ async def _fetch_all_pages(
         url = base_url + query + (f"&state={state}" if state else "")
         try:
             async with _gdt_sem:
-                # Tối đa 3 lần thử / trang. Nếu vẫn không kết nối được thì trả lỗi
-                # cho client, tránh báo thành công với danh sách hóa đơn thiếu.
+                # Tối đa 3 lần thử / trang. Nếu vẫn lỗi kết nối, chuyển lỗi lên
+                # nơi gọi để quyết định dừng hay bỏ qua theo từng nguồn.
                 resp = await _gdt_get(url, username, password, max_attempts=3)
         except _GDTTransportError as e:
             log.error(
@@ -1191,6 +1216,8 @@ async def _fetch_all_pages(
             )
             raise
         if not isinstance(resp, dict):
+            if source_errors is not None:
+                source_errors.append({"reason_code": "GDT_RESPONSE_ERROR", "page": page})
             break
         if "path" in resp and "timestamp" in resp:
             # Lỗi nghiệp vụ GDT trên nguồn này — bỏ nguồn, không fail cả list.
@@ -1201,6 +1228,8 @@ async def _fetch_all_pages(
                 page,
                 resp.get("message", "GDT error"),
             )
+            if source_errors is not None:
+                source_errors.append({"reason_code": "GDT_RESPONSE_ERROR", "page": page})
             break
         results.extend(resp.get("datas") or [])
         state = resp.get("state") or ""
@@ -1266,6 +1295,7 @@ async def _fetch_invoice_list_core(
     inv_type: int,
     progress_action: str,
     run_id: str = "",
+    skipped_sources: Optional[list[dict]] = None,
 ) -> list[dict]:
     """Lấy, phân trang và deduplicate toàn bộ summary hóa đơn."""
     df = _fmt_date(date_from, end_of_day=False)
@@ -1275,6 +1305,7 @@ async def _fetch_invoice_list_core(
     total_counter = [0]
     configs = _list_configs(inv_type)
     source_total = len(configs)
+    warnings = skipped_sources if skipped_sources is not None else []
 
     for source_index, (prefix, endpoint, type_search, label) in enumerate(configs, start=1):
         if type_search is not None:
@@ -1289,6 +1320,7 @@ async def _fetch_invoice_list_core(
             )
 
         total_counter[0] = len(all_items)
+        source_errors: list[dict] = []
         try:
             page_items = await _fetch_all_pages(
                 f"{GDT_BASE}/{prefix}/invoices/{endpoint}",
@@ -1301,11 +1333,20 @@ async def _fetch_invoice_list_core(
                 source_index=source_index,
                 source_total=source_total,
                 run_id=run_id,
+                source_errors=source_errors,
             )
-        except _GDTTransportError:
-            # Đã thử kết nối đủ 3 lần ở _fetch_all_pages; chuyển lỗi lên endpoint
-            # để client nhận success=false thay vì dữ liệu danh sách không đầy đủ.
-            raise
+        except _GDTTransportError as e:
+            if prefix != "sco-query":
+                # Nguồn thông thường vẫn phải báo lỗi khi lấy danh sách thất bại.
+                raise
+            # Nguồn máy tính tiền thường bị treo; bỏ qua sau 3 lần thử để
+            # không làm mất kết quả các nguồn khác hoặc chặn bước tiếp theo.
+            log.warning(
+                "[%s] Bỏ qua nguồn máy tính tiền %d/%d [%s] sau 3 lần thử lỗi kết nối, tiếp tục: %s",
+                _log_subject(username), source_index, source_total, label, e,
+            )
+            page_items = []
+            source_errors.append({"reason_code": "GDT_TRANSPORT_ERROR"})
         except Exception as e:
             # Không fail cả fetch-invoice-list — bỏ nguồn lỗi, sang nguồn tiếp theo.
             log.warning(
@@ -1317,6 +1358,20 @@ async def _fetch_invoice_list_core(
                 e,
             )
             page_items = []
+            source_errors.append({"reason_code": "GDT_REQUEST_ERROR"})
+        for source_error in source_errors:
+            reason_key = {
+                "GDT_TRANSPORT_ERROR": "source_skip_transport",
+                "GDT_RESPONSE_ERROR": "source_skip_response",
+                "GDT_REQUEST_ERROR": "source_skip_request",
+            }[source_error["reason_code"]]
+            warnings.append({
+                "source": f"{prefix}/invoices/{endpoint}",
+                "source_name": label,
+                "type_search": type_search,
+                **source_error,
+                "message": _t("source_skipped", label=label, reason=_t(reason_key)),
+            })
         for item in page_items:
             key = (
                 item.get("khhdon"),
@@ -1342,7 +1397,7 @@ async def _fetch_invoice_list_core(
             source_index=source_index,
             source_total=source_total,
             run_id=run_id,
-            message=_t(
+            message=warnings[-1]["message"] if source_errors else _t(
                 "source_done",
                 source_index=source_index,
                 source_total=source_total,
@@ -1798,6 +1853,7 @@ async def handle_fetch_invoice_list(request: web.Request) -> web.Response:
         )
 
     action = "fetch-invoice-list"
+    skipped_sources: list[dict] = []
     run_id = datetime.now().strftime("%Y%m%d%H%M%S%f")
     source_total = len(_list_configs(inv_type))
     # Xóa progress cũ ngay lập tức để client không poll phải 3/3 của lần trước.
@@ -1821,7 +1877,8 @@ async def handle_fetch_invoice_list(request: web.Request) -> web.Response:
     )
     try:
         items = await _fetch_invoice_list_core(
-            username, password, date_from, date_to, inv_type, action, run_id=run_id
+            username, password, date_from, date_to, inv_type, action, run_id=run_id,
+            skipped_sources=skipped_sources,
         )
     except Exception as e:
         _set_progress(
@@ -1835,7 +1892,10 @@ async def handle_fetch_invoice_list(request: web.Request) -> web.Response:
         log.error(
             "[%s] fetch-invoice-list lỗi: %s", _log_subject(username), e
         )
-        return web.json_response({"success": False, "error": str(e)}, status=500)
+        return web.json_response({
+            "success": False, "error": str(e), "skipped_sources": skipped_sources,
+            "message": "\n".join(warning["message"] for warning in skipped_sources),
+        }, status=500)
 
     total = len(items)
     _set_progress(
@@ -1855,7 +1915,13 @@ async def handle_fetch_invoice_list(request: web.Request) -> web.Response:
         "[%s] fetch-invoice-list hoàn thành: %d HĐ %s→%s",
         _log_subject(username), total, date_from, date_to,
     )
-    return web.json_response({"success": True, "count": total, "items": items})
+    return web.json_response({
+        "success": True, "count": total, "items": items,
+        "skipped_sources": skipped_sources,
+        "message": "\n".join(
+            [_t("list_done", total=total)] + [warning["message"] for warning in skipped_sources]
+        ),
+    })
 
 
 async def handle_fetch_invoice_details(request: web.Request) -> web.Response:
@@ -2068,20 +2134,25 @@ async def handle_fetch_all_invoice(request: web.Request) -> web.Response:
         )
 
     action = "fetch-all-invoice"
+    skipped_sources: list[dict] = []
     _set_progress(
         username, status="starting", action=action, message=_t("starting")
     )
 
     try:
         all_items = await _fetch_invoice_list_core(
-            username, password, date_from, date_to, inv_type, action
+            username, password, date_from, date_to, inv_type, action,
+            skipped_sources=skipped_sources,
         )
     except Exception as e:
         _set_progress(
             username, status="error", action=action, phase="error", message=str(e)
         )
         log.error("[%s] fetch-all-invoice (list) lỗi: %s", _log_subject(username), e)
-        return web.json_response({"success": False, "error": str(e)}, status=500)
+        return web.json_response({
+            "success": False, "error": str(e), "skipped_sources": skipped_sources,
+            "message": "\n".join(warning["message"] for warning in skipped_sources),
+        }, status=500)
 
     total = len(all_items)
     log.info(
@@ -2098,7 +2169,10 @@ async def handle_fetch_all_invoice(request: web.Request) -> web.Response:
             username, status="error", action=action, phase="error", message=str(e)
         )
         log.error("[%s] fetch-all-invoice (detail) lỗi: %s", _log_subject(username), e)
-        return web.json_response({"success": False, "error": str(e)}, status=500)
+        return web.json_response({
+            "success": False, "error": str(e), "skipped_sources": skipped_sources,
+            "message": "\n".join(warning["message"] for warning in skipped_sources),
+        }, status=500)
 
     is_partial = failed_count > 0
     _set_progress(username,
@@ -2126,6 +2200,11 @@ async def handle_fetch_all_invoice(request: web.Request) -> web.Response:
         "count": total,
         "detail_error_count": failed_count,
         "items": results,
+        "skipped_sources": skipped_sources,
+        "message": "\n".join([
+            _t("partial_detail_done", failed=failed_count, total=total)
+            if is_partial else _t("all_done", total=total)
+        ] + [warning["message"] for warning in skipped_sources]),
     }
     return web.json_response(payload, status=207 if is_partial else 200)
 

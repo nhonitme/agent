@@ -31,7 +31,7 @@ if errorlevel 1 (
 )
 echo.
 
-echo [2/3] Build AMConnectGDT.exe (version 1.0.7)...
+echo [2/3] Build AMConnectGDT.exe (version_info.txt)...
 python -m PyInstaller --clean --noconfirm AMConnectGDT.spec
 if errorlevel 1 (
     echo [LOI] Build that bai. Xem log ben tren.

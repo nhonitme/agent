@@ -1,70 +1,51 @@
-2026-07-28 16:21:56 [INFO] =======================================================
-2026-07-28 16:21:56 [INFO] AMnote GDT
-2026-07-28 16:21:56 [INFO]   Port          : 8099
-2026-07-28 16:21:56 [INFO]   Max concurrent: 10
-2026-07-28 16:21:56 [INFO]   GDT page size : 30
-2026-07-28 16:21:56 [INFO]   Max HTTP      : 10
-2026-07-28 16:21:56 [INFO]   Log file      : D:\AMNOTE\GDTTool\agent\dist\win7-win11-x64\agent.log
-2026-07-28 16:21:56 [INFO] =======================================================
-2026-07-28 16:21:56 [INFO] Agent sẵn sàng tại http://127.0.0.1:8099
-2026-07-28 16:21:56 [INFO] System tray icon đã khởi động
-2026-07-28 16:23:48 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/captcha "HTTP/1.1 200 OK"
-2026-07-28 16:23:48 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/captcha "HTTP/1.1 200 OK"
-2026-07-28 16:23:48 [INFO] HTTP Request: POST https://hoadondientu.gdt.gov.vn/api/security-taxpayer/authenticate "HTTP/1.1 200 OK"
-2026-07-28 16:23:48 [INFO] [user:1d789ad66bcf] Đăng nhập GDT OK (lần 1)
-2026-07-28 16:23:56 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/captcha "HTTP/1.1 200 OK"
-2026-07-28 16:23:56 [INFO] HTTP Request: POST https://hoadondientu.gdt.gov.vn/api/security-taxpayer/authenticate "HTTP/1.1 401 Unauthorized"
-2026-07-28 16:23:56 [ERROR] [user:7c6ac453290f] GDT từ chối đăng nhập: Tên đăng nhập hoặc mật khẩu không đúng
-2026-07-28 16:27:40 [INFO] [user:1d789ad66bcf] Tải XML: https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=1
-2026-07-28 16:27:40 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=1 "HTTP/1.1 200 OK"
-2026-07-28 16:32:19 [INFO] [user:1d789ad66bcf] Tải XML: https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=1
-2026-07-28 16:32:19 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=1 "HTTP/1.1 200 OK"
-2026-07-28 17:27:45 [INFO] =======================================================
-2026-07-28 17:27:45 [INFO] AMnote GDT
-2026-07-28 17:27:45 [INFO]   Port          : 8099
-2026-07-28 17:27:45 [INFO]   Max concurrent: 10
-2026-07-28 17:27:45 [INFO]   GDT page size : 30
-2026-07-28 17:27:45 [INFO]   Max HTTP      : 10
-2026-07-28 17:27:45 [INFO]   Log file      : D:\AMNOTE\GDTTool\agent\dist\win7-win11-x64\agent.log
-2026-07-28 17:27:45 [INFO] =======================================================
-2026-07-28 17:27:45 [INFO] Agent sẵn sàng tại http://127.0.0.1:8099
-2026-07-28 17:27:45 [INFO] System tray icon đã khởi động
-2026-07-28 17:27:48 [INFO] [user:1d789ad66bcf] Tải XML: https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=1
-2026-07-28 17:27:48 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/captcha "HTTP/1.1 200 OK"
-2026-07-28 17:27:48 [INFO] HTTP Request: POST https://hoadondientu.gdt.gov.vn/api/security-taxpayer/authenticate "HTTP/1.1 401 Unauthorized"
-2026-07-28 17:27:48 [WARNING] [user:1d789ad66bcf] Captcha sai, thử lại 1/5...
-2026-07-28 17:27:48 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/captcha "HTTP/1.1 200 OK"
-2026-07-28 17:27:48 [INFO] HTTP Request: POST https://hoadondientu.gdt.gov.vn/api/security-taxpayer/authenticate "HTTP/1.1 401 Unauthorized"
-2026-07-28 17:27:48 [WARNING] [user:1d789ad66bcf] Captcha sai, thử lại 2/5...
-2026-07-28 17:27:49 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/captcha "HTTP/1.1 200 OK"
-2026-07-28 17:27:49 [INFO] HTTP Request: POST https://hoadondientu.gdt.gov.vn/api/security-taxpayer/authenticate "HTTP/1.1 200 OK"
-2026-07-28 17:27:49 [INFO] [user:1d789ad66bcf] Đăng nhập GDT OK (lần 3)
-2026-07-28 17:27:49 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=1 "HTTP/1.1 200 OK"
-2026-07-28 17:27:53 [INFO] [user:1d789ad66bcf] Tải XML: https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=12
-2026-07-28 17:27:53 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=12 "HTTP/1.1 500 Internal Server Error"
-2026-07-28 17:27:53 [WARNING] [user:1d789ad66bcf] GDT GET bytes lỗi HTTPStatusError (lần 1/5): Server error '500 Internal Server Error' for url 'https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=12'
-For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
-2026-07-28 17:27:54 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=12 "HTTP/1.1 500 Internal Server Error"
-2026-07-28 17:27:54 [WARNING] [user:1d789ad66bcf] GDT GET bytes lỗi HTTPStatusError (lần 2/5): Server error '500 Internal Server Error' for url 'https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=12'
-For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
-2026-07-28 17:27:56 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=12 "HTTP/1.1 500 Internal Server Error"
-2026-07-28 17:27:56 [WARNING] [user:1d789ad66bcf] GDT GET bytes lỗi HTTPStatusError (lần 3/5): Server error '500 Internal Server Error' for url 'https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=12'
-For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
-2026-07-28 17:28:00 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=12 "HTTP/1.1 500 Internal Server Error"
-2026-07-28 17:28:00 [WARNING] [user:1d789ad66bcf] GDT GET bytes lỗi HTTPStatusError (lần 4/5): Server error '500 Internal Server Error' for url 'https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=12'
-For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
-2026-07-28 17:28:08 [INFO] HTTP Request: GET https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=12 "HTTP/1.1 500 Internal Server Error"
-2026-07-28 17:28:08 [WARNING] [user:1d789ad66bcf] GDT GET bytes lỗi HTTPStatusError (lần 5/5): Server error '500 Internal Server Error' for url 'https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=12'
-For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
-2026-07-28 17:28:08 [ERROR] [user:1d789ad66bcf] Tải XML thất bại: Kết nối thuế thất bại sau 5 lần thử: Server error '500 Internal Server Error' for url 'https://hoadondientu.gdt.gov.vn/api/query/invoices/export-xml?nbmst=0318465328&khhdon=C26TTL&shdon=2792&khmshdon=12'
-For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
-2026-09-16 10:26:37 [INFO] =======================================================
-2026-09-16 10:26:37 [INFO] AMnote GDT
-2026-09-16 10:26:37 [INFO]   Port          : 8099
-2026-09-16 10:26:37 [INFO]   Max concurrent: 10
-2026-09-16 10:26:37 [INFO]   GDT page size : 30
-2026-09-16 10:26:37 [INFO]   Max HTTP      : 10
-2026-09-16 10:26:37 [INFO]   Log file      : D:\AMNOTE\GDTToolpass\GDTTool\agent\dist\win7-win11-x64\agent.log
-2026-09-16 10:26:37 [INFO] =======================================================
-2026-09-16 10:26:37 [INFO] Agent sẵn sàng tại http://127.0.0.1:8099
-2026-09-16 10:26:37 [INFO] System tray icon đã khởi động
+2026-10-23 09:26:50 [INFO] =======================================================
+2026-10-23 09:26:50 [INFO] AMnote GDT
+2026-10-23 09:26:50 [INFO]   Port          : 8099
+2026-10-23 09:26:50 [INFO]   Max concurrent: 10
+2026-10-23 09:26:50 [INFO]   Detail workers: 5
+2026-10-23 09:26:50 [INFO]   Detail retries: 2 attempts, 8.0s timeout
+2026-10-23 09:26:50 [INFO]   GDT page size : 15
+2026-10-23 09:26:50 [INFO]   Max HTTP      : 10
+2026-10-23 09:26:50 [INFO]   Log file      : D:\AMNOTE\GDTToolpass\GDTToolGit\agent\dist\win7-win11-x64\agent.log
+2026-10-23 09:26:50 [INFO] =======================================================
+2026-10-23 09:26:50 [INFO] Agent sẵn sàng tại http://127.0.0.1:8099
+2026-10-23 09:26:50 [INFO] System tray icon đã khởi động
+2026-10-23 09:27:00 [INFO] [user:1d789ad66bcf] Đăng nhập GDT OK (lần 1)
+2026-10-23 09:27:14 [WARNING] [user:1d789ad66bcf] GDT GET lỗi RequestException (lần 1/3): Failed to perform, curl: (28) Operation too slow. Less than 1 bytes/sec transferred the last 10 seconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+2026-10-23 09:27:25 [WARNING] [user:1d789ad66bcf] GDT GET lỗi RequestException (lần 2/3): Failed to perform, curl: (28) Operation too slow. Less than 1 bytes/sec transferred the last 10 seconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+2026-10-23 09:27:37 [WARNING] [user:1d789ad66bcf] GDT GET lỗi RequestException (lần 3/3): Failed to perform, curl: (28) Operation too slow. Less than 1 bytes/sec transferred the last 10 seconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+2026-10-23 09:27:37 [ERROR] [user:1d789ad66bcf] GDT lỗi kết nối danh sách [mua vào - máy tính tiền] trang 1 sau 3 lần thử: Kết nối thuế thất bại sau 3 lần thử: Failed to perform, curl: (28) Operation too slow. Less than 1 bytes/sec transferred the last 10 seconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+2026-10-23 09:27:37 [WARNING] [user:1d789ad66bcf] Bỏ qua nguồn máy tính tiền 3/3 [mua vào - máy tính tiền] sau 3 lần thử lỗi kết nối, tiếp tục: Kết nối thuế thất bại sau 3 lần thử: Failed to perform, curl: (28) Operation too slow. Less than 1 bytes/sec transferred the last 10 seconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+2026-10-23 09:27:37 [INFO] [user:1d789ad66bcf] fetch-invoice-list hoàn thành: 50 HĐ 20261001→20261031
+2026-10-23 09:39:00 [WARNING] [user:1d789ad66bcf] GDT GET lỗi RequestException (lần 1/3): Failed to perform, curl: (28) Operation too slow. Less than 1 bytes/sec transferred the last 10 seconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+2026-10-23 09:39:11 [WARNING] [user:1d789ad66bcf] GDT GET lỗi RequestException (lần 2/3): Failed to perform, curl: (28) Operation too slow. Less than 1 bytes/sec transferred the last 10 seconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+2026-10-23 09:39:23 [WARNING] [user:1d789ad66bcf] GDT GET lỗi RequestException (lần 3/3): Failed to perform, curl: (28) Operation too slow. Less than 1 bytes/sec transferred the last 10 seconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+2026-10-23 09:39:23 [ERROR] [user:1d789ad66bcf] GDT lỗi kết nối danh sách [mua vào - máy tính tiền] trang 1 sau 3 lần thử: Kết nối thuế thất bại sau 3 lần thử: Failed to perform, curl: (28) Operation too slow. Less than 1 bytes/sec transferred the last 10 seconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+2026-10-23 09:39:23 [WARNING] [user:1d789ad66bcf] Bỏ qua nguồn máy tính tiền 3/3 [mua vào - máy tính tiền] sau 3 lần thử lỗi kết nối, tiếp tục: Kết nối thuế thất bại sau 3 lần thử: Failed to perform, curl: (28) Operation too slow. Less than 1 bytes/sec transferred the last 10 seconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+2026-10-23 09:39:23 [INFO] [user:1d789ad66bcf] fetch-invoice-list hoàn thành: 50 HĐ 20261001→20261031
+2026-10-23 09:48:25 [INFO] =======================================================
+2026-10-23 09:48:25 [INFO] AMnote GDT
+2026-10-23 09:48:25 [INFO]   Port          : 8099
+2026-10-23 09:48:25 [INFO]   Max concurrent: 10
+2026-10-23 09:48:25 [INFO]   Detail workers: 5
+2026-10-23 09:48:25 [INFO]   Detail retries: 2 attempts, 8.0s timeout
+2026-10-23 09:48:25 [INFO]   GDT page size : 15
+2026-10-23 09:48:25 [INFO]   Max HTTP      : 10
+2026-10-23 09:48:25 [INFO]   Log file      : D:\AMNOTE\GDTToolpass\GDTToolGit\agent\dist\win7-win11-x64\agent.log
+2026-10-23 09:48:25 [INFO] =======================================================
+2026-10-23 09:48:25 [INFO] Agent sẵn sàng tại http://127.0.0.1:8099
+2026-10-23 09:48:25 [INFO] System tray icon đã khởi động
+2026-10-23 09:49:32 [WARNING] [user:b8c1d074941c] Captcha sai, thử lại 1/5...
+2026-10-23 09:49:33 [INFO] [user:b8c1d074941c] Đăng nhập GDT OK (lần 2)
+2026-10-23 09:49:45 [WARNING] [user:b8c1d074941c] GDT GET lỗi RequestException (lần 1/3): Failed to perform, curl: (28) Operation too slow. Less than 1 bytes/sec transferred the last 10 seconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+2026-10-23 09:49:56 [WARNING] [user:b8c1d074941c] GDT GET lỗi RequestException (lần 2/3): Failed to perform, curl: (28) Operation too slow. Less than 1 bytes/sec transferred the last 10 seconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+2026-10-23 09:50:08 [WARNING] [user:b8c1d074941c] GDT GET lỗi RequestException (lần 3/3): Failed to perform, curl: (28) Operation too slow. Less than 1 bytes/sec transferred the last 10 seconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+2026-10-23 09:50:08 [ERROR] [user:b8c1d074941c] GDT lỗi kết nối danh sách [bán ra - máy tính tiền] trang 1 sau 3 lần thử: Kết nối thuế thất bại sau 3 lần thử: Failed to perform, curl: (28) Operation too slow. Less than 1 bytes/sec transferred the last 10 seconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+2026-10-23 09:50:08 [WARNING] [user:b8c1d074941c] Bỏ qua nguồn máy tính tiền 2/2 [bán ra - máy tính tiền] sau 3 lần thử lỗi kết nối, tiếp tục: Kết nối thuế thất bại sau 3 lần thử: Failed to perform, curl: (28) Operation too slow. Less than 1 bytes/sec transferred the last 10 seconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+2026-10-23 09:50:08 [INFO] [user:b8c1d074941c] fetch-invoice-list hoàn thành: 0 HĐ 20261023→20261031
+2026-10-23 09:50:54 [WARNING] [user:b8c1d074941c] GDT GET lỗi RequestException (lần 1/3): Failed to perform, curl: (28) Operation too slow. Less than 1 bytes/sec transferred the last 10 seconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+2026-10-23 09:50:55 [WARNING] [user:b8c1d074941c] GDT GET lỗi HTTPError (lần 2/3): HTTP Error 500: 
+2026-10-23 09:51:07 [WARNING] [user:b8c1d074941c] GDT GET lỗi RequestException (lần 3/3): Failed to perform, curl: (28) Operation too slow. Less than 1 bytes/sec transferred the last 10 seconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+2026-10-23 09:51:07 [ERROR] [user:b8c1d074941c] GDT lỗi kết nối danh sách [mua vào - máy tính tiền] trang 1 sau 3 lần thử: Kết nối thuế thất bại sau 3 lần thử: Failed to perform, curl: (28) Operation too slow. Less than 1 bytes/sec transferred the last 10 seconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+2026-10-23 09:51:07 [WARNING] [user:b8c1d074941c] Bỏ qua nguồn máy tính tiền 3/3 [mua vào - máy tính tiền] sau 3 lần thử lỗi kết nối, tiếp tục: Kết nối thuế thất bại sau 3 lần thử: Failed to perform, curl: (28) Operation too slow. Less than 1 bytes/sec transferred the last 10 seconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+2026-10-23 09:51:07 [INFO] [user:b8c1d074941c] fetch-invoice-list hoàn thành: 0 HĐ 20261023→20261031
